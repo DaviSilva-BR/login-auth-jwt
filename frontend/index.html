@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+</head>
+<body>
+   <div style="padding:150px">
+    <form id="form" method="post">
+        <input type="text" name="email" id="" value="admin@gmail.com"><br>
+        <input type="password" name="password" id="" value="123"><br>
+        <input type="submit" value="Logar">
+    </form>
+    <button id="btn-login">VERIFICAR AUTENTICAÇÃO</button>
+   </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+    <script>
+        const form  = document.querySelector("#form");
+        const btn = document.querySelector("#btn-login");
+
+        axios.defaults.baseURL = 'http://localhost:3000';
+        form.addEventListener('submit', async function(event){
+            event.preventDefault();
+
+            try {
+                const formData = new FormData(event.target);
+                const {data} = await  axios.post('login.php', formData);
+
+                sessionStorage.setItem('session', data);
+            } catch (error) {
+                console.log('erro:' + error);
+            }
+        });
+
+        btn.addEventListener('click', async () => {
+           try {
+                const authSession = sessionStorage.getItem('session');
+                const {data} = await  axios.get('auth.php', {
+                    headers:{
+                        "Authorization": authSession
+                    }
+                   
+                })
+                console.log(data);
+
+           } catch (error) {
+            if(error.response.data === 'Expired token'){
+                alert("Sessão expirou");
+            }
+            console.log('Erro:' + error);
+           }
+        })
+    </script>
+</body>
+</html>
